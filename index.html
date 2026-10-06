@@ -169,26 +169,42 @@ code{font-size:12.5px;background:var(--surface);border:1px solid var(--border);b
   <!-- 3. RULES -->
   <section class="card hidden" id="secRules">
     <h2><span class="step">3</span>Entry rules</h2>
-    <p class="sub">Every change re-checks all entries instantly. One entry per person, no matter how many times they comment.</p>
+    <p class="sub">To win, a person must do <b>both</b>: comment a tool, and share the reel to their story tagging @<span class="handleEcho">tulz.lv</span>. One entry per person, however many times they comment.</p>
     <div class="rules">
       <div>
-        <label class="check"><input type="checkbox" id="rMention"> <span>Comment must mention <b>@<span id="handleEcho">tulz.lv</span></b></span></label>
-        <div style="margin:4px 0 12px 26px"><input type="text" id="rHandle" placeholder="tulz.lv"></div>
-        <label class="check"><input type="checkbox" id="rTool"> <span>Comment must name a tool <span class="hint">(if no keyword below is found, the entry goes to <b>Needs review</b> so you can approve it by hand)</span></span></label>
+        <label class="f">① Comment on the reel</label>
+        <label class="check"><input type="checkbox" id="rTool"> <span>Must name a tool or thing <span class="hint">(anything rentable — drill, Xbox, sewing machine, leaf blower…). If no keyword matches, the entry goes to <b>Needs review</b> so you can approve it with one click.</span></span></label>
+        <label class="check"><input type="checkbox" id="rMention"> <span>Must also mention @<span class="handleEcho">tulz.lv</span> in the comment <span class="hint">(off — the tag belongs in the story)</span></span></label>
         <label class="check"><input type="checkbox" id="rReplies"> <span>Count replies to other comments too</span></label>
-        <label class="f" style="margin-top:12px" for="rDeadline">Deadline (comments after this are ignored)</label>
+        <label class="f" style="margin-top:14px" for="rDeadline">Deadline (comments after this are ignored)</label>
         <input type="datetime-local" id="rDeadline">
+        <label class="f" style="margin-top:12px" for="rHandle">Your Instagram handle</label>
+        <input type="text" id="rHandle" placeholder="tulz.lv">
         <label class="f" style="margin-top:12px" for="rExclude">Exclude accounts</label>
-        <input type="text" id="rExclude" placeholder="tulz.lv, staff_account">
+        <input type="text" id="rExclude" placeholder="staff_account">
         <div class="hint">Comma-separated. The post owner is always excluded.</div>
       </div>
       <div>
-        <label class="f" for="rKeywords">Tool keywords (one per line, Latvian without ā/š/ž is fine)</label>
-        <textarea id="rKeywords" rows="12"></textarea>
+        <label class="f">② Story share tagging @<span class="handleEcho">tulz.lv</span></label>
+        <label class="check"><input type="checkbox" id="rStory"> <span>Required to win</span></label>
+        <label class="f" style="margin-top:10px" for="rStories">Who tagged you in a story <span style="font-weight:400;color:var(--muted)">(<span id="storyCount">0</span> added)</span></label>
+        <textarea id="rStories" rows="7" placeholder="janis.krumins&#10;liga_diy&#10;@martins.k"></textarea>
+        <div class="hint">One username per line, or separated by commas or spaces. The @ is optional. Paste as the notifications come in — this list is saved for this post.</div>
+        <details style="margin-top:10px">
+          <summary>Where to find these names</summary>
+          <ol>
+            <li>In the Instagram app as <b>@<span class="handleEcho">tulz.lv</span></b>, a story tag arrives as a notification <i>and</i> as a message in your inbox (<b>DMs → “mentioned you in their story”</b>).</li>
+            <li>The inbox is the reliable place: notifications scroll away, messages stay for 24 h after the story ends.</li>
+            <li>Copy each username into the box above. Do this once a day during the giveaway, so nothing is missed.</li>
+          </ol>
+          <p class="hint">Meta’s API does not expose story tags, so no tool (this one included) can collect them for you.</p>
+        </details>
+        <label class="f" style="margin-top:14px" for="rKeywords">Tool / thing keywords (one per line, Latvian without ā/š/ž is fine)</label>
+        <textarea id="rKeywords" rows="6"></textarea>
         <div class="row" style="margin-top:6px"><button class="small ghost" id="btnResetKw">Reset to default list</button></div>
       </div>
     </div>
-    <div class="note" style="margin-top:16px"><b>Can’t be checked automatically:</b> nobody (including Meta’s API) can see who <b>shared</b> the post or who <b>follows</b> @tulz.lv. Check these for the winner in step 5 and re-draw if they don’t qualify.</div>
+    <div class="note hidden" style="margin-top:16px" id="storyEmptyNote"><b>No story tags added yet,</b> so nobody is eligible. Add the usernames on the right, or untick “Required to win” to draw from the commenters alone.</div>
   </section>
 
   <!-- 4. ENTRIES -->
@@ -196,9 +212,9 @@ code{font-size:12.5px;background:var(--surface);border:1px solid var(--border);b
     <h2><span class="step">4</span>Entries</h2>
     <p class="sub" id="entriesSub">—</p>
     <div class="stats">
-      <div class="stat"><b id="sComments">0</b><span>comments</span></div>
-      <div class="stat"><b id="sPeople">0</b><span>people</span></div>
-      <div class="stat"><b id="sValid" style="color:var(--ok)">0</b><span>valid entries</span></div>
+      <div class="stat"><b id="sPeople">0</b><span>commented</span></div>
+      <div class="stat"><b id="sStory">0</b><span>story tags</span></div>
+      <div class="stat"><b id="sValid" style="color:var(--ok)">0</b><span>eligible (did both)</span></div>
       <div class="stat"><b id="sReview" style="color:var(--warn)">0</b><span>need review</span></div>
     </div>
     <div class="row">
@@ -222,7 +238,7 @@ code{font-size:12.5px;background:var(--surface);border:1px solid var(--border);b
   <!-- 5. DRAW -->
   <section class="card hidden" id="secDraw">
     <h2><span class="step">5</span>Draw the winner</h2>
-    <p class="sub"><b id="eligibleCount">0</b> eligible entries. The draw uses your browser’s cryptographic random generator, so every valid entry has an equal chance.</p>
+    <p class="sub"><b id="eligibleCount">0</b> eligible entries — people who commented a tool <b>and</b> tagged you in a story. The draw uses your browser’s cryptographic random generator, so each has an equal chance.</p>
     <div class="row">
       <div style="width:110px"><label class="f" for="nWinners">Winners</label><input type="number" id="nWinners" min="1" max="50" value="1"></div>
       <button class="primary" id="btnDraw" style="align-self:flex-end">🎲 Draw</button>
@@ -254,21 +270,41 @@ const CONFIG = {
 };
 
 const DEFAULT_KEYWORDS = [
-  // English
-  'drill','screwdriver','impact driver','saw','jigsaw','hammer','mallet','wrench','spanner','pliers','chisel',
+  // Power & hand tools — English
+  'drill','screwdriver','impact driver','saw','jigsaw','chainsaw','hammer','mallet','wrench','spanner','pliers','chisel',
   'clamp','sander','grinder','router','planer','spirit level','tape measure','measuring tape','multitool','multi-tool','glue gun',
   'heat gun','nail gun','stapler','ratchet','socket set','vise','vice','rasp','crowbar','axe','knife','cutter',
-  'soldering','toolbox','tool kit','toolkit','workbench','ladder','trowel','paint brush','roller',
-  // Latviešu (without diacritics also matches)
-  'urbj','urbi','urbt','skrūvgriez','zāģi','zāģa','zāģu','zāģe','figūrzāģ','āmur','atslēg',
+  'soldering','toolbox','tool kit','toolkit','workbench','ladder','trowel','paint brush','roller','compressor',
+  'welder','welding','generator','jackhammer','tile cutter','concrete mixer','scaffold','winch','laser level',
+  // Garden & cleaning
+  'leaf blower','lawn mower','lawnmower','mower','trimmer','hedge','chipper','shredder','tiller','cultivator',
+  'pressure washer','power washer','karcher','kärcher','vacuum','hoover','steam cleaner','carpet cleaner','polisher',
+  'dehumidifier','humidifier','heater','fan','snow blower','snowblower',
+  // Home, hobby & "any thing we could rent"
+  'sewing machine','embroidery','knitting','3d printer','printer','projector','camera','drone','gopro','tripod',
+  'speaker','microphone','turntable','guitar','piano','keyboard','bike','e-bike','scooter','trailer','roof box',
+  'tent','grill','bbq','smoker','fryer','coffee machine','blender','mixer','ice cream','popcorn','raclette','fondue',
+  'xbox','playstation','ps5','nintendo','switch','vr','oculus','quest','console','laptop','ipad','tablet',
+  'baby','stroller','car seat','crib','massage','sauna','pool','kayak','paddle','ski','snowboard','sled',
+  // Latviešu (works with or without ā/š/ž)
+  'urbj','urbi','urbt','urbmaš','skrūvgriez','zāģi','zāģa','zāģu','zāģe','figūrzāģ','ķēdes zāģ','āmur','atslēg',
   'knaibl','kalt','skavas','spīles','slīpmašīn','slīpētāj','flex','frēz','ēvel','līmeņrād','mērlent','rulete',
-  'lodāmur','līmes pistol','cirvi','nazi','instrument','darbagald','kāpnes','špaktel','ota','rullīt',
+  'lodāmur','līmes pistol','cirvi','nazi','instrument','darbagald','kāpnes','špaktel','ota','rullīt','kompresor',
+  'metinām','ģenerator','atskaldām','betona maisītāj','sastatnes','trose',
+  'lapu pūtēj','pļaujmašīn','pļāvēj','trimmer','dzīvžog','smalcinātāj','kultivator','augstspiediena','mazgātāj',
+  'putekļsūcēj','tvaika','paklāj','sausinātāj','mitrinātāj','sildītāj','ventilator','sniega',
+  'šujmašīn','adāmmašīn','projektor','kamera','dron','statīv','skaļrun','mikrofon','ģitār','velosipēd','skrejrit',
+  'piekab','telts','grils','kafijas aparāt','blender','mikser','konsole','planšet','rati','autokrēsl','masāž',
+  'pirts','baseins','kajak','airu','slēp','ragav',
   // Emoji
-  '🔨','🪚','🔧','🪛','⛏','🪓','🛠','🧰','🗜','🪜','🖌','📏',
+  '🔨','🪚','🔧','🪛','⛏','🪓','🛠','🧰','🗜','🪜','🖌','📏','🧹','🧽','🎮','📷','🚲','⛺','🧵',
 ].join('\n');
 
-const DEFAULT_RULES = { handle:'tulz.lv', requireMention:true, requireTool:true, includeReplies:false, deadline:'', exclude:'', keywords:DEFAULT_KEYWORDS };
-const LS_RULES = 'tulz-giveaway-rules';
+const DEFAULT_RULES = {
+  handle:'tulz.lv', requireMention:false, requireTool:true, requireStory:true,
+  includeReplies:false, deadline:'', exclude:'', keywords:DEFAULT_KEYWORDS, stories:'',
+};
+const LS_RULES = 'tulz-giveaway-rules-v2';
 
 const state = {
   token:null, demo:false, accounts:[], account:null, media:[], mediaNext:null,
@@ -490,6 +526,7 @@ function selectPost(id){
   state.overrides = saved.overrides || {};
   state.winners = saved.winners || [];
   state.log = saved.log || [];
+  $('rStories').value = saved.stories || (state.demo ? DEMO.stories : '');
   renderMedia();
   ['secRules', 'secEntries', 'secDraw'].forEach(s => show(s));
   loadComments();
@@ -497,7 +534,8 @@ function selectPost(id){
 }
 
 function persistPost(){
-  if (state.post) lsSet('tulz-giveaway-post-' + state.post.id, { overrides:state.overrides, winners:state.winners, log:state.log });
+  if (state.post) lsSet('tulz-giveaway-post-' + state.post.id,
+    { overrides:state.overrides, winners:state.winners, log:state.log, stories:$('rStories').value });
 }
 
 /* ============================ comments ============================ */
@@ -535,20 +573,27 @@ async function loadComments(){
 function loadRules(){
   const r = { ...DEFAULT_RULES, ...(lsGet(LS_RULES) || {}) };
   $('rHandle').value = r.handle; $('rMention').checked = r.requireMention; $('rTool').checked = r.requireTool;
-  $('rReplies').checked = r.includeReplies; $('rDeadline').value = r.deadline; $('rExclude').value = r.exclude;
-  $('rKeywords').value = r.keywords; $('handleEcho').textContent = r.handle;
+  $('rStory').checked = r.requireStory; $('rReplies').checked = r.includeReplies;
+  $('rDeadline').value = r.deadline; $('rExclude').value = r.exclude; $('rKeywords').value = r.keywords;
+  echoHandle(r.handle);
 }
+function echoHandle(h){ document.querySelectorAll('.handleEcho').forEach(e => e.textContent = h); }
+
 function readRules(){
   const r = {
     handle: $('rHandle').value.trim().replace(/^@/, '') || 'tulz.lv',
-    requireMention: $('rMention').checked, requireTool: $('rTool').checked, includeReplies: $('rReplies').checked,
-    deadline: $('rDeadline').value, exclude: $('rExclude').value, keywords: $('rKeywords').value,
+    requireMention: $('rMention').checked, requireTool: $('rTool').checked, requireStory: $('rStory').checked,
+    includeReplies: $('rReplies').checked, deadline: $('rDeadline').value, exclude: $('rExclude').value,
+    keywords: $('rKeywords').value, stories: $('rStories').value,
   };
-  $('handleEcho').textContent = r.handle;
-  // Only store a custom keyword list, so improvements to the default list still reach you
-  lsSet(LS_RULES, { ...r, keywords: r.keywords === DEFAULT_KEYWORDS ? undefined : r.keywords });
+  echoHandle(r.handle);
+  // Keyword list is only stored when customised, so improvements to the default list still reach you.
+  // The story list belongs to one post, so it is saved with that post, not here.
+  lsSet(LS_RULES, { ...r, keywords: r.keywords === DEFAULT_KEYWORDS ? undefined : r.keywords, stories: undefined });
   return r;
 }
+
+const parseUsers = s => [...new Set(String(s).split(/[\s,;]+/).map(x => x.replace(/^@/, '').toLowerCase()).filter(Boolean))];
 
 // Words must match at the start of a word ("ota" ≠ "protams"); emoji match anywhere.
 function keywordMatcher(raw){
@@ -569,9 +614,13 @@ function recompute(){
   const r = readRules();
   const mentionRe = new RegExp('(^|[^\\w.])@' + escRe(r.handle) + '(?!\\w)(?!\\.\\w)', 'i');
   const keywords = [...new Map(r.keywords.split('\n').map(s => s.trim()).filter(Boolean).map(raw => [norm(raw), keywordMatcher(raw)])).values()];
-  const excluded = new Set(r.exclude.split(/[\s,]+/).map(s => s.replace(/^@/, '').toLowerCase()).filter(Boolean));
+  const excluded = new Set(parseUsers(r.exclude));
   const owner = (state.account?.username || '').toLowerCase();
   const deadline = r.deadline ? new Date(r.deadline) : null;
+  const storyUsers = parseUsers(r.stories);
+  const storySet = new Set(storyUsers);
+  $('storyCount').textContent = storyUsers.length;
+  show('storyEmptyNote', r.requireStory && !storyUsers.length && state.comments.length > 0);
 
   const users = new Map();
   for (const c of state.comments) {
@@ -588,18 +637,24 @@ function recompute(){
     const text = inTime.map(c => c.text).join('\n');
     const mention = mentionRe.test(text);
     const tools = detectTools(text, keywords);
-    let status = 'valid', reason = 'Meets all rules';
+    const story = storySet.has(u.key);
+    let status = 'valid', reason = 'Comment + story share';
     if (u.key === owner) { status = 'invalid'; reason = 'Post owner'; }
     else if (excluded.has(u.key)) { status = 'invalid'; reason = 'Excluded account'; }
     else if (!inTime.length) { status = 'invalid'; reason = 'Commented after deadline'; }
     else if (r.requireMention && !mention) { status = 'invalid'; reason = `No @${r.handle} mention`; }
-    else if (r.requireTool && !tools.length) { status = 'review'; reason = 'No tool keyword found. Read and decide'; }
+    else if (r.requireStory && !story) { status = 'invalid'; reason = 'No story tag'; }
+    else if (r.requireTool && !tools.length) { status = 'review'; reason = 'Named no known tool. Read and decide'; }
+    else if (!r.requireStory) reason = 'Meets all rules';
     const ov = state.overrides[u.key];
-    const autoStatus = status;
     if (ov === 'approve' && reason !== 'Post owner') { status = 'valid'; reason = 'Approved manually'; }
     if (ov === 'reject') { status = 'invalid'; reason = 'Rejected manually'; }
-    return { ...u, first: parseTs(u.comments[0].timestamp), tools, status, autoStatus, reason, override: ov };
+    return { ...u, first: parseTs(u.comments[0].timestamp), tools, story, status, reason, override: ov };
   }).sort((a, b) => a.first - b.first);
+
+  // Story taggers who never commented cannot win, but are worth seeing
+  const commenters = new Set(state.entries.map(e => e.key));
+  state.storyOnly = storyUsers.filter(u => !commenters.has(u) && u !== owner);
 
   renderEntries();
   renderDraw();
@@ -608,8 +663,8 @@ function recompute(){
 /* ============================ 4. Entries ============================ */
 function renderEntries(){
   const E = state.entries, cnt = s => E.filter(e => e.status === s).length;
-  $('sComments').textContent = state.comments.length;
   $('sPeople').textContent = E.length;
+  $('sStory').textContent = parseUsers($('rStories').value).length;
   $('sValid').textContent = cnt('valid');
   $('sReview').textContent = cnt('review');
   document.querySelectorAll('#tabs button').forEach(b => {
@@ -631,9 +686,10 @@ function renderEntries(){
     if (e.status !== 'valid') acts.push(`<button class="small" data-act="approve" data-k="${esc(e.key)}">Approve</button>`);
     if (e.status !== 'invalid') acts.push(`<button class="small" data-act="reject" data-k="${esc(e.key)}">Reject</button>`);
     if (e.override) acts.push(`<button class="small ghost" data-act="reset" data-k="${esc(e.key)}">Undo</button>`);
+    const story = `<span class="badge ${e.story ? 'b-valid' : 'b-invalid'}" title="Story share tagging you">${e.story ? '📲 story' : '📲 no story'}</span>`;
     return `<div class="entry">
       <div class="who"><a href="https://instagram.com/${encodeURIComponent(e.username)}" target="_blank" rel="noopener">@${esc(e.username)}</a>
-        <span class="badge b-${e.status}">${label[e.status]}</span>${winnerKeys.has(e.key) ? '<span class="badge b-valid">🏆 Winner</span>' : ''}
+        <span class="badge b-${e.status}">${label[e.status]}</span>${story}${winnerKeys.has(e.key) ? '<span class="badge b-valid">🏆 Winner</span>' : ''}
         <span class="reason">${esc(e.reason)}</span>${e.tools.slice(0, 3).map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div>
       <div class="acts">${acts.join('')}</div>
       <div class="cmts">${cm}</div></div>`;
@@ -647,8 +703,9 @@ function setOverride(key, v){
 
 function exportCsv(){
   const q = s => `"${String(s).replace(/"/g, '""')}"`;
-  const lines = [['username', 'status', 'reason', 'tools_detected', 'first_comment', 'comments'].join(',')];
-  for (const e of state.entries) lines.push([e.username, e.status, e.reason, e.tools.join(' | '), e.first.toISOString(), e.comments.map(c => c.text).join(' || ')].map(q).join(','));
+  const lines = [['username', 'status', 'reason', 'story_tag', 'tools_detected', 'first_comment', 'comments'].join(',')];
+  for (const e of state.entries) lines.push([e.username, e.status, e.reason, e.story ? 'yes' : 'no', e.tools.join(' | '), e.first.toISOString(), e.comments.map(c => c.text).join(' || ')].map(q).join(','));
+  for (const u of state.storyOnly || []) lines.push([u, 'invalid', 'Story tag but no comment', 'yes', '', '', ''].map(q).join(','));
   const blob = new Blob(['﻿' + lines.join('\n')], { type:'text/csv;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob); a.download = `giveaway-entries-${state.post.id}.csv`; a.click();
@@ -670,7 +727,7 @@ function renderDraw(){
         <a class="wname" href="https://instagram.com/${encodeURIComponent(w.username)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">@${esc(w.username)}</a>
         <span class="reason">drawn ${fmtDate(new Date(w.at))}</span></div>
       ${w.status === 'dq' ? '' : `<div class="checks">
-        ${[['follows', 'Follows @' + esc(readRulesQuiet().handle)], ['shared', 'Shared the post'], ['contacted', 'Contacted / DM sent']].map(([k, l]) =>
+        ${[['story', 'Story tag verified'], ['follows', 'Follows @' + esc(readRulesQuiet().handle)], ['contacted', 'Contacted / DM sent']].map(([k, l]) =>
           `<label class="check"><input type="checkbox" data-w="${i}" data-c="${k}" ${w.checks[k] ? 'checked' : ''}> ${l}</label>`).join('')}
       </div>
       <div class="row"><button class="small" data-redraw="${i}">Doesn’t qualify. Disqualify &amp; draw a replacement</button></div>`}
@@ -688,7 +745,7 @@ async function draw(count, replacingIndex = null){
   for (let i = 0; i < count && pool.length; i++) picks.push(pool.splice(randInt(pool.length), 1)[0]);
   await animate(picks, names);
   const at = new Date().toISOString();
-  for (const p of picks) state.winners.push({ key:p.key, username:p.username, status:'ok', at, checks:{ follows:false, shared:false, contacted:false } });
+  for (const p of picks) state.winners.push({ key:p.key, username:p.username, status:'ok', at, checks:{ story:!!p.story, follows:false, contacted:false } });
   state.log.push(`${new Date(at).toLocaleString()} · ${replacingIndex !== null ? 'Replacement draw' : 'Draw'} from ${poolSize} eligible entries (pool #${fp}) → ${picks.map(p => '@' + p.username).join(', ')}`);
   persistPost(); renderDraw(); renderEntries();
 }
@@ -726,6 +783,9 @@ function copyResults(){
 /* ============================ demo data ============================ */
 const DEMO = {
   account: { id:'demo', username:'tulz.lv', pageName:'Tulz' },
+  stories: ['janis.krumins','liga_diy','martins.k','anna_creates','edgars_wood','kristine.home','dace.b','toms_builds',
+    'ilze_garden','madara.art','oskars_m','reinis_f','evija.l','nora_makes','peteris.w','vents.b','zane_crafts',
+    'arturs.d','elina.s','roberts_j','sintija.v','liene_p','mareks.z','kaspars_n','never_commented'].join('\n'),
   media: [
     { id:'m1', emoji:'🪚', caption:'🎁 GIVEAWAY! Win this DIY birdhouse kit. Comment, tag @tulz.lv and tell us which tool you’d use first!', media_type:'IMAGE', comments_count:46, timestamp:'2026-10-01T09:00:00+0000', permalink:'https://www.instagram.com/p/DEMO1/' },
     { id:'m2', emoji:'🔨', caption:'Workshop weekend: shelf build from scratch', media_type:'IMAGE', comments_count:12, timestamp:'2026-09-24T15:00:00+0000', permalink:'https://www.instagram.com/p/DEMO2/' },
@@ -758,6 +818,8 @@ function startDemo(){
   showErr('connErr', '');
   state.demo = true; state.token = null; state.accounts = [DEMO.account];
   afterConnect();
+  // Pre-fill a few story taggers so the demo shows both criteria working
+  $('rStories').value = DEMO.stories;
 }
 
 /* ============================ wiring ============================ */
@@ -772,7 +834,8 @@ $('acctSelect').onchange = e => selectAccount(+e.target.value);
 $('btnMoreMedia').onclick = () => loadMedia(true);
 $('btnFindPost').onclick = findPostByUrl;
 $('mediaGrid').onclick = e => { const b = e.target.closest('.media'); if (b) selectPost(b.dataset.id); };
-['rHandle', 'rMention', 'rTool', 'rReplies', 'rDeadline', 'rExclude', 'rKeywords'].forEach(id => $(id).addEventListener('input', () => { if (state.post) recompute(); else readRules(); }));
+['rHandle', 'rMention', 'rTool', 'rStory', 'rReplies', 'rDeadline', 'rExclude', 'rKeywords', 'rStories'].forEach(id =>
+  $(id).addEventListener('input', () => { if (state.post) { persistPost(); recompute(); } else readRules(); }));
 $('btnResetKw').onclick = () => { $('rKeywords').value = DEFAULT_KEYWORDS; state.post ? recompute() : readRules(); };
 $('tabs').onclick = e => { const b = e.target.closest('button'); if (b) { state.filter = b.dataset.f; renderEntries(); } };
 $('search').oninput = renderEntries;
