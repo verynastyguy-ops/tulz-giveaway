@@ -101,6 +101,9 @@ code{font-size:12.5px;background:var(--surface);border:1px solid var(--border);b
 .winner .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .wname{font-size:20px;font-weight:800;word-break:break-all}
 .winner .checks{display:flex;gap:16px;flex-wrap:wrap}
+.verify{background:var(--warn-soft);border-radius:10px;padding:12px 14px;font-size:14px}
+.verify b{color:var(--warn)}
+.verify .hint{color:var(--warn);opacity:.85}
 .log{font-size:12.5px;color:var(--muted);margin-top:14px;display:grid;gap:4px;font-family:ui-monospace,Consolas,monospace}
 .progress{font-size:14px;color:var(--muted);margin-top:10px}
 #overlay{position:fixed;inset:0;background:rgba(10,9,8,.82);z-index:20;display:grid;place-items:center;padding:16px}
@@ -186,32 +189,25 @@ code{font-size:12.5px;background:var(--surface);border:1px solid var(--border);b
       </div>
       <div>
         <label class="f">② Story share tagging @<span class="handleEcho">tulz.lv</span></label>
-        <label class="check"><input type="checkbox" id="rStory"> <span>Required to win</span></label>
-        <label class="f" style="margin-top:10px" for="rStoryPaste">Paste anything from Instagram</label>
-        <textarea id="rStoryPaste" rows="4" placeholder="Select the notifications or DM list on instagram.com, copy, and paste the whole lot here — messy text is fine."></textarea>
-        <div class="row" style="margin-top:6px">
-          <button class="small primary" id="btnExtract">Find usernames</button>
-          <span class="hint" id="extractMsg"></span>
+        <div class="note" style="margin:0 0 12px"><b>Checked at the draw, not here.</b> Instagram shows story tags only as display names (“Anna Dobrā”), while comments give usernames (“annadobraa”), so they cannot be matched in bulk — by this tool or any other. Draw a winner, then verify that one person in step 5. If they didn’t share, one click disqualifies them and draws a replacement.</div>
+        <label class="check"><input type="checkbox" id="rStory"> <span>I have the usernames anyway — require a story tag to be eligible</span></label>
+        <div id="storyBox" class="hidden" style="margin-top:12px">
+          <label class="f" for="rStories">Confirmed story tags <span style="font-weight:400;color:var(--muted)">(<span id="storyCount">0</span>)</span></label>
+          <textarea id="rStories" rows="5" placeholder="janis.krumins&#10;liga_diy&#10;@martins.k"></textarea>
+          <div class="hint">One per line, or separated by commas or spaces. The @ is optional. Saved for this post.</div>
+          <label class="f" style="margin-top:12px" for="rStoryPaste">Or paste messy text and let the tool pick out usernames</label>
+          <textarea id="rStoryPaste" rows="3" placeholder="Paste anything containing @usernames."></textarea>
+          <div class="row" style="margin-top:6px">
+            <button class="small" id="btnExtract">Find usernames</button>
+            <span class="hint" id="extractMsg"></span>
+          </div>
         </div>
-        <label class="f" style="margin-top:14px" for="rStories">Confirmed story tags <span style="font-weight:400;color:var(--muted)">(<span id="storyCount">0</span>)</span></label>
-        <textarea id="rStories" rows="5" placeholder="janis.krumins&#10;liga_diy&#10;@martins.k"></textarea>
-        <div class="hint">One per line, or separated by commas or spaces. The @ is optional. Saved for this post, so you can add to it day by day.</div>
-        <details style="margin-top:10px">
-          <summary>How to collect these in a minute</summary>
-          <ol>
-            <li>Open <a href="https://www.instagram.com/direct/inbox/" target="_blank" rel="noopener">instagram.com/direct/inbox</a> on a computer, signed in as <b>@<span class="handleEcho">tulz.lv</span></b>. Story tags arrive there as messages (“mentioned you in your story”), and unlike notifications they don’t scroll away.</li>
-            <li>Select the conversation list, copy it, and paste it into the box above. Click <b>Find usernames</b>.</li>
-            <li>It keeps only names that actually commented on this post, and ignores all the surrounding text — so pasting too much is harmless.</li>
-            <li>Do this once a day during the giveaway. Story tags are only visible for 24 h after the story ends.</li>
-          </ol>
-          <p class="hint">Meta’s API does not expose story tags to any third-party tool, so this one step stays manual.</p>
-        </details>
-        <label class="f" style="margin-top:14px" for="rKeywords">Tool / thing keywords (one per line, Latvian without ā/š/ž is fine)</label>
+        <label class="f" style="margin-top:16px" for="rKeywords">Tool / thing keywords (one per line, Latvian without ā/š/ž is fine)</label>
         <textarea id="rKeywords" rows="6"></textarea>
         <div class="row" style="margin-top:6px"><button class="small ghost" id="btnResetKw">Reset to default list</button></div>
       </div>
     </div>
-    <div class="note hidden" style="margin-top:16px" id="storyEmptyNote"><b>No story tags added yet,</b> so nobody is eligible. Add the usernames on the right, or untick “Required to win” to draw from the commenters alone.</div>
+    <div class="note hidden" style="margin-top:16px" id="storyEmptyNote"><b>No story tags added yet,</b> so nobody is eligible. Add usernames above, or untick the box to draw from the commenters and verify the winner afterwards.</div>
   </section>
 
   <!-- 4. ENTRIES -->
@@ -245,7 +241,7 @@ code{font-size:12.5px;background:var(--surface);border:1px solid var(--border);b
   <!-- 5. DRAW -->
   <section class="card hidden" id="secDraw">
     <h2><span class="step">5</span>Draw the winner</h2>
-    <p class="sub"><b id="eligibleCount">0</b> eligible entries — people who commented a tool <b>and</b> tagged you in a story. The draw uses your browser’s cryptographic random generator, so each has an equal chance.</p>
+    <p class="sub"><b id="eligibleCount">0</b> eligible entries. The draw uses your browser’s cryptographic random generator, so each has an equal chance. <b>Verify the winner’s story share below before announcing.</b></p>
     <div class="row">
       <div style="width:110px"><label class="f" for="nWinners">Winners</label><input type="number" id="nWinners" min="1" max="50" value="1"></div>
       <button class="primary" id="btnDraw" style="align-self:flex-end">🎲 Draw</button>
@@ -308,10 +304,10 @@ const DEFAULT_KEYWORDS = [
 ].join('\n');
 
 const DEFAULT_RULES = {
-  handle:'tulz.lv', requireMention:false, requireTool:true, requireStory:true,
+  handle:'tulz.lv', requireMention:false, requireTool:true, requireStory:false,
   includeReplies:false, deadline:'', exclude:'', keywords:DEFAULT_KEYWORDS, stories:'',
 };
-const LS_RULES = 'tulz-giveaway-rules-v2';
+const LS_RULES = 'tulz-giveaway-rules-v3';
 
 const state = {
   token:null, demo:false, accounts:[], account:null, media:[], mediaNext:null,
@@ -656,6 +652,7 @@ function recompute(){
   const storyUsers = parseUsers(r.stories);
   const storySet = new Set(storyUsers);
   $('storyCount').textContent = storyUsers.length;
+  show('storyBox', r.requireStory);
   show('storyEmptyNote', r.requireStory && !storyUsers.length && state.comments.length > 0);
 
   const users = new Map();
@@ -757,17 +754,32 @@ function eligiblePool(){
 function renderDraw(){
   $('eligibleCount').textContent = eligiblePool().length;
   const W = state.winners;
-  $('winners').innerHTML = W.map((w, i) => `
-    <div class="winner${w.status === 'dq' ? ' dq' : ''}">
-      <div class="top"><span class="badge ${w.status === 'dq' ? 'b-invalid' : 'b-valid'}">${w.status === 'dq' ? 'Disqualified' : '🏆 Winner'}</span>
+  $('winners').innerHTML = W.map((w, i) => {
+    if (w.status === 'dq') return `<div class="winner dq">
+      <div class="top"><span class="badge b-invalid">Disqualified</span>
+        <span class="wname">@${esc(w.username)}</span>
+        <span class="reason">${esc(w.dqReason || 'did not qualify')} · drawn ${fmtDate(new Date(w.at))}</span></div></div>`;
+    const pending = !w.checks.story;
+    return `<div class="winner">
+      <div class="top"><span class="badge ${pending ? 'b-review' : 'b-valid'}">${pending ? 'Verify story' : '🏆 Confirmed'}</span>
         <a class="wname" href="https://instagram.com/${encodeURIComponent(w.username)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">@${esc(w.username)}</a>
         <span class="reason">drawn ${fmtDate(new Date(w.at))}</span></div>
-      ${w.status === 'dq' ? '' : `<div class="checks">
-        ${[['story', 'Story tag verified'], ['follows', 'Follows @' + esc(readRulesQuiet().handle)], ['contacted', 'Contacted / DM sent']].map(([k, l]) =>
+      ${pending ? `<div class="verify">
+        <b>Did @${esc(w.username)} share the reel to their story and tag @${esc(readRulesQuiet().handle)}?</b>
+        <div class="hint" style="margin:6px 0 10px">Check your Instagram DMs for a “mentioned you in their story” message from them, or open
+          <a href="https://instagram.com/${encodeURIComponent(w.username)}" target="_blank" rel="noopener">their profile</a> to match the display name.
+          Story tags stay in your inbox for 24 h after the story ends.</div>
+        <div class="row">
+          <button class="small primary" data-confirm="${i}">✓ Yes — they shared. Confirm winner</button>
+          <button class="small" data-redraw="${i}">✗ No — disqualify &amp; draw a replacement</button>
+        </div></div>`
+      : `<div class="checks">
+        ${[['follows', 'Follows @' + esc(readRulesQuiet().handle)], ['contacted', 'Contacted / DM sent']].map(([k, l]) =>
           `<label class="check"><input type="checkbox" data-w="${i}" data-c="${k}" ${w.checks[k] ? 'checked' : ''}> ${l}</label>`).join('')}
       </div>
-      <div class="row"><button class="small" data-redraw="${i}">Doesn’t qualify. Disqualify &amp; draw a replacement</button></div>`}
-    </div>`).join('');
+      <div class="row"><button class="small ghost" data-redraw="${i}">Disqualify &amp; draw a replacement</button></div>`}
+    </div>`;
+  }).join('');
   $('log').innerHTML = state.log.map(l => `<div>${esc(l)}</div>`).join('');
   show('btnCopy', W.length > 0); show('btnClearWinners', W.length > 0);
 }
@@ -885,11 +897,19 @@ $('btnDraw').onclick = () => draw(Math.max(1, Math.min(50, parseInt($('nWinners'
 $('btnCopy').onclick = copyResults;
 $('btnClearWinners').onclick = () => { if (confirm('Clear all drawn winners and the draw log for this post?')) { state.winners = []; state.log = []; persistPost(); renderDraw(); renderEntries(); } };
 $('winners').onclick = e => {
+  const ok = e.target.closest('button[data-confirm]');
+  if (ok) {
+    const w = state.winners[+ok.dataset.confirm];
+    w.checks.story = true;
+    state.log.push(`${new Date().toLocaleString()} · @${w.username} story share verified`);
+    persistPost(); renderDraw(); return;
+  }
   const b = e.target.closest('button[data-redraw]');
   if (!b) return;
   const w = state.winners[+b.dataset.redraw];
   w.status = 'dq';
-  state.log.push(`${new Date().toLocaleString()} · @${w.username} disqualified`);
+  w.dqReason = w.checks.story ? 'disqualified' : 'no story share';
+  state.log.push(`${new Date().toLocaleString()} · @${w.username} disqualified (${w.dqReason})`);
   draw(1, +b.dataset.redraw);
 };
 $('winners').onchange = e => {
