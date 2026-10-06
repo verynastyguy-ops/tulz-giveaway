@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Tulz Giveaway Picker</title>
+<style>
+:root{
+  --bg:#f6f5f2; --surface:#fff; --surface-2:#f0eee9; --text:#1c1b19; --muted:#6b675f; --border:#e3e0d8;
+  --accent:#e8590c; --accent-ink:#fff; --accent-soft:#fdebdd;
+  --ok:#1f7a3d; --ok-soft:#e1f3e6; --warn:#9a5700; --warn-soft:#fdf0d5; --bad:#b42318; --bad-soft:#fde4e1;
+  --radius:12px; --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#141311; --surface:#1d1c1a; --surface-2:#262421; --text:#f1efe9; --muted:#a29d93; --border:#34312c;
+    --accent:#ff7a33; --accent-ink:#1a0d04; --accent-soft:#3a2416;
+    --ok:#5ccb83; --ok-soft:#173222; --warn:#f0b357; --warn-soft:#352812; --bad:#ff8a7f; --bad-soft:#3d1c19;
+    --shadow:none;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+.bar{max-width:1040px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.logo{font-weight:800;letter-spacing:-.02em;font-size:18px}
+.logo span{color:var(--accent)}
+.pill{margin-left:auto;font-size:13px;padding:4px 10px;border-radius:999px;background:var(--surface-2);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
+.pill.on{background:var(--ok-soft);color:var(--ok)}
+main{max-width:1040px;margin:0 auto;padding:20px 16px 80px;display:grid;gap:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+.card h2{margin:0 0 4px;font-size:17px;display:flex;align-items:center;gap:10px}
+.step{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:13px;font-weight:700;flex:none}
+.sub{color:var(--muted);margin:0 0 16px;font-size:14px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.grow{flex:1 1 240px;min-width:0}
+input[type=text],input[type=password],input[type=number],input[type=datetime-local],textarea,select{
+  width:100%;font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 11px}
+textarea{resize:vertical;min-height:90px;font-size:13px}
+input:focus,textarea:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+label.f{display:block;font-size:13px;font-weight:600;margin-bottom:5px}
+.hint{font-size:12.5px;color:var(--muted);margin-top:4px}
+button{font:inherit;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);padding:9px 14px;cursor:pointer;white-space:nowrap}
+button:hover{border-color:var(--muted)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.primary:hover{filter:brightness(1.06)}
+button.fb{background:#1877f2;border-color:#1877f2;color:#fff}
+button.small{padding:5px 10px;font-size:13px}
+button.ghost{background:transparent}
+button:disabled{opacity:.5;cursor:not-allowed}
+details{border:1px solid var(--border);border-radius:8px;padding:10px 14px;background:var(--surface-2);margin-top:14px}
+details summary{cursor:pointer;font-weight:600;font-size:14px}
+details ol{margin:10px 0 4px;padding-left:20px;font-size:14px}
+details li{margin-bottom:6px}
+code{font-size:12.5px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1px 5px;word-break:break-all}
+.err{background:var(--bad-soft);color:var(--bad);border-radius:8px;padding:10px 12px;margin-top:12px;font-size:14px}
+.note{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:10px 12px;font-size:13.5px}
+.hidden{display:none!important}
+.grid-media{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.media{padding:0;text-align:left;overflow:hidden;background:var(--surface);display:flex;flex-direction:column;font-weight:400}
+.media.sel{outline:3px solid var(--accent);border-color:var(--accent)}
+.thumb{aspect-ratio:1;width:100%;object-fit:cover;background:var(--surface-2);display:grid;place-items:center;font-size:42px}
+.media .meta{padding:8px 10px;font-size:12.5px;display:grid;gap:2px}
+.media .cap{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--text)}
+.media .cnt{color:var(--muted)}
+.rules{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:720px){.rules{grid-template-columns:1fr}}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:6px 0;cursor:pointer}
+.check input{margin-top:3px;accent-color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+@media (max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--surface-2);border-radius:10px;padding:10px 12px}
+.stat b{display:block;font-size:22px;line-height:1.2}
+.stat span{font-size:12.5px;color:var(--muted)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{border-radius:999px;padding:5px 12px;font-size:13px}
+.tabs button.act{background:var(--text);color:var(--bg);border-color:var(--text)}
+.list{display:grid;gap:8px;margin-top:12px;max-height:620px;overflow:auto;padding-right:2px}
+.entry{border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:6px 12px}
+.entry .who{display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-width:0}
+.entry .who a{font-weight:700;text-decoration:none;color:var(--text);word-break:break-all}
+.entry .acts{display:flex;gap:6px;align-items:start;flex-wrap:wrap;justify-content:flex-end}
+.entry .cmts{grid-column:1/-1;display:grid;gap:4px}
+.cmt{font-size:14px;background:var(--surface-2);border-radius:8px;padding:6px 10px;word-wrap:break-word}
+.cmt small{color:var(--muted);font-size:12px;margin-left:6px}
+.mention{color:var(--accent);font-weight:600}
+.badge{font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px}
+.b-valid{background:var(--ok-soft);color:var(--ok)}
+.b-review{background:var(--warn-soft);color:var(--warn)}
+.b-invalid{background:var(--bad-soft);color:var(--bad)}
+.reason{font-size:12.5px;color:var(--muted)}
+.chip{font-size:12px;background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:1px 7px}
+.empty{color:var(--muted);text-align:center;padding:24px;font-size:14px}
+.winners{display:grid;gap:10px;margin-top:14px}
+.winner{border:2px solid var(--accent);border-radius:12px;padding:14px;display:grid;gap:8px}
+.winner.dq{border-color:var(--border);opacity:.6}
+.winner.dq .wname{text-decoration:line-through}
+.winner .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wname{font-size:20px;font-weight:800;word-break:break-all}
+.winner .checks{display:flex;gap:16px;flex-wrap:wrap}
+.log{font-size:12.5px;color:var(--muted);margin-top:14px;display:grid;gap:4px;font-family:ui-monospace,Consolas,monospace}
+.progress{font-size:14px;color:var(--muted);margin-top:10px}
+#overlay{position:fixed;inset:0;background:rgba(10,9,8,.82);z-index:20;display:grid;place-items:center;padding:16px}
+#overlay .box{text-align:center;color:#fff;max-width:100%}
+#overlay .lbl{font-size:14px;letter-spacing:.12em;text-transform:uppercase;opacity:.7}
+#overlay .spin{font-size:clamp(28px,7vw,60px);font-weight:800;margin:14px 0 24px;word-break:break-all;min-height:1.3em}
+#overlay .spin.final{color:#ff7a33}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;z-index:30;max-width:calc(100% - 32px)}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="logo">tulz<span>.</span>lv giveaway</div>
+    <div class="pill" id="connPill">Not connected</div>
+  </div>
+</header>
+
+<main>
+  <!-- 1. CONNECT -->
+  <section class="card" id="secConnect">
+    <h2><span class="step">1</span>Connect Instagram</h2>
+    <p class="sub">Use the Meta account that is admin of the Facebook Page linked to @tulz.lv.</p>
+    <div class="row" id="fbRow">
+      <button class="fb" id="btnFb">Log in with Facebook</button>
+      <span class="hint" id="fbHint"></span>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <div class="grow"><input type="password" id="tokenInput" placeholder="…or paste an access token" autocomplete="off"></div>
+      <button class="primary" id="btnToken">Connect</button>
+      <button class="ghost" id="btnDemo">Try with demo data</button>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label class="check"><input type="checkbox" id="remember" checked> <span>Remember on this computer <span class="hint">(saves a Page token in this browser, so you don’t paste again)</span></span></label>
+      <button class="small ghost hidden" id="btnForget" style="margin-left:auto">Disconnect &amp; forget</button>
+    </div>
+    <details>
+      <summary>How to get an access token (5 minutes)</summary>
+      <ol>
+        <li>@tulz.lv must be an Instagram <b>Business or Creator</b> account linked to a Facebook Page (Instagram app → Settings → Account type).</li>
+        <li>In <a href="https://developers.facebook.com/apps" target="_blank" rel="noopener">Meta for Developers</a>, open the app you already use for Facebook Login on tulz.lv. Add the Instagram use case / product (<i>“Manage messaging &amp; content on Instagram”</i> or <i>“Instagram API with Facebook Login”</i>). If Meta doesn’t offer it because the app is a <i>Consumer</i> type, create a new <b>Business</b>-type app just for this.</li>
+        <li>Open the <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener">Graph API Explorer</a>, choose that app, click <b>Generate Access Token</b> and allow these permissions:<br>
+          <code>instagram_basic</code> <code>instagram_manage_comments</code> <code>pages_show_list</code> <code>pages_read_engagement</code> <code>business_management</code></li>
+        <li>Copy the token and paste it above. It is only sent to <code>graph.facebook.com</code>.</li>
+      </ol>
+      <p class="hint"><b>Connect once, never again:</b> a token from the Explorer lasts ~1–2 hours. To make the saved login permanent, first open the <a href="https://developers.facebook.com/tools/debug/accesstoken/" target="_blank" rel="noopener">Access Token Debugger</a>, paste the token, click <b>Debug</b>, then <b>Extend Access Token</b> at the bottom, and paste <i>that</i> token here with “Remember” ticked. The tool turns it into a Page token that doesn’t expire. It stops working only if you change your Facebook password or remove the app.</p>
+      <p class="hint">Because only you (an app admin) use it on your own account, Meta’s App Review isn’t needed.</p>
+    </details>
+    <div class="err hidden" id="connErr"></div>
+  </section>
+
+  <!-- 2. PICK POST -->
+  <section class="card hidden" id="secPost">
+    <h2><span class="step">2</span>Choose the giveaway post</h2>
+    <p class="sub">Pick the post people are commenting on.</p>
+    <div class="row" style="margin-bottom:12px">
+      <div class="grow" id="acctWrap"><select id="acctSelect"></select></div>
+      <div class="grow"><input type="text" id="postUrl" placeholder="…or paste the post link (instagram.com/p/…)"></div>
+      <button id="btnFindPost">Find</button>
+    </div>
+    <div class="grid-media" id="mediaGrid"></div>
+    <div class="row" style="margin-top:12px"><button id="btnMoreMedia" class="hidden">Load older posts</button></div>
+    <div class="err hidden" id="postErr"></div>
+  </section>
+
+  <!-- 3. RULES -->
+  <section class="card hidden" id="secRules">
+    <h2><span class="step">3</span>Entry rules</h2>
+    <p class="sub">Every change re-checks all entries instantly. One entry per person, no matter how many times they comment.</p>
+    <div class="rules">
+      <div>
+        <label class="check"><input type="checkbox" id="rMention"> <span>Comment must mention <b>@<span id="handleEcho">tulz.lv</span></b></span></label>
+        <div style="margin:4px 0 12px 26px"><input type="text" id="rHandle" placeholder="tulz.lv"></div>
+        <label class="check"><input type="checkbox" id="rTool"> <span>Comment must name a tool <span class="hint">(if no keyword below is found, the entry goes to <b>Needs review</b> so you can approve it by hand)</span></span></label>
+        <label class="check"><input type="checkbox" id="rReplies"> <span>Count replies to other comments too</span></label>
+        <label class="f" style="margin-top:12px" for="rDeadline">Deadline (comments after this are ignored)</label>
+        <input type="datetime-local" id="rDeadline">
+        <label class="f" style="margin-top:12px" for="rExclude">Exclude accounts</label>
+        <input type="text" id="rExclude" placeholder="tulz.lv, staff_account">
+        <div class="hint">Comma-separated. The post owner is always excluded.</div>
+      </div>
+      <div>
+        <label class="f" for="rKeywords">Tool keywords (one per line, Latvian without ā/š/ž is fine)</label>
+        <textarea id="rKeywords" rows="12"></textarea>
+        <div class="row" style="margin-top:6px"><button class="small ghost" id="btnResetKw">Reset to default list</button></div>
+      </div>
+    </div>
+    <div class="note" style="margin-top:16px"><b>Can’t be checked automatically:</b> nobody (including Meta’s API) can see who <b>shared</b> the post or who <b>follows</b> @tulz.lv. Check these for the winner in step 5 and re-draw if they don’t qualify.</div>
+  </section>
+
+  <!-- 4. ENTRIES -->
+  <section class="card hidden" id="secEntries">
+    <h2><span class="step">4</span>Entries</h2>
+    <p class="sub" id="entriesSub">—</p>
+    <div class="stats">
+      <div class="stat"><b id="sComments">0</b><span>comments</span></div>
+      <div class="stat"><b id="sPeople">0</b><span>people</span></div>
+      <div class="stat"><b id="sValid" style="color:var(--ok)">0</b><span>valid entries</span></div>
+      <div class="stat"><b id="sReview" style="color:var(--warn)">0</b><span>need review</span></div>
+    </div>
+    <div class="row">
+      <div class="tabs" id="tabs">
+        <button data-f="all" class="act">All</button>
+        <button data-f="valid">Valid</button>
+        <button data-f="review">Needs review</button>
+        <button data-f="invalid">Invalid</button>
+      </div>
+      <div class="grow"><input type="text" id="search" placeholder="Search username or comment"></div>
+      <button id="btnReload" class="small">Reload comments</button>
+      <button id="btnCsv" class="small">Export CSV</button>
+    </div>
+    <div class="row hidden" id="bulkRow" style="margin-top:10px">
+      <button class="small" id="btnApproveAll">Approve all “needs review”</button>
+    </div>
+    <div class="progress hidden" id="progress"></div>
+    <div class="list" id="list"></div>
+  </section>
+
+  <!-- 5. DRAW -->
+  <section class="card hidden" id="secDraw">
+    <h2><span class="step">5</span>Draw the winner</h2>
+    <p class="sub"><b id="eligibleCount">0</b> eligible entries. The draw uses your browser’s cryptographic random generator, so every valid entry has an equal chance.</p>
+    <div class="row">
+      <div style="width:110px"><label class="f" for="nWinners">Winners</label><input type="number" id="nWinners" min="1" max="50" value="1"></div>
+      <button class="primary" id="btnDraw" style="align-self:flex-end">🎲 Draw</button>
+      <button id="btnCopy" style="align-self:flex-end" class="hidden">Copy results</button>
+      <button id="btnClearWinners" style="align-self:flex-end" class="ghost hidden">Clear results</button>
+    </div>
+    <div class="winners" id="winners"></div>
+    <div class="log" id="log"></div>
+  </section>
+</main>
+
+<div id="overlay" class="hidden" role="dialog" aria-modal="true" aria-live="polite">
+  <div class="box">
+    <div class="lbl" id="ovLabel">Drawing…</div>
+    <div class="spin" id="ovName"></div>
+    <button class="primary hidden" id="ovClose">Done</button>
+  </div>
+</div>
+
+<script>
+/* ============================ CONFIG ============================
+   APP_ID: your Meta app ID. Enables the "Log in with Facebook" button
+   when this page is hosted on https on a domain added to the app
+   (e.g. https://tulz.lv/giveaway/). Leave empty to use token paste only. */
+const CONFIG = {
+  APP_ID: '',            // "Tulz Giveaway" app is 29346055001662047 (only needed if hosted on tulz.lv)
+  GRAPH_VERSION: 'v23.0',
+  SCOPES: 'instagram_basic,instagram_manage_comments,pages_show_list,pages_read_engagement,business_management',
+};
+
+const DEFAULT_KEYWORDS = [
+  // English
+  'drill','screwdriver','impact driver','saw','jigsaw','hammer','mallet','wrench','spanner','pliers','chisel',
+  'clamp','sander','grinder','router','planer','spirit level','tape measure','measuring tape','multitool','multi-tool','glue gun',
+  'heat gun','nail gun','stapler','ratchet','socket set','vise','vice','rasp','crowbar','axe','knife','cutter',
+  'soldering','toolbox','tool kit','toolkit','workbench','ladder','trowel','paint brush','roller',
+  // Latviešu (without diacritics also matches)
+  'urbj','urbi','urbt','skrūvgriez','zāģi','zāģa','zāģu','zāģe','figūrzāģ','āmur','atslēg',
+  'knaibl','kalt','skavas','spīles','slīpmašīn','slīpētāj','flex','frēz','ēvel','līmeņrād','mērlent','rulete',
+  'lodāmur','līmes pistol','cirvi','nazi','instrument','darbagald','kāpnes','špaktel','ota','rullīt',
+  // Emoji
+  '🔨','🪚','🔧','🪛','⛏','🪓','🛠','🧰','🗜','🪜','🖌','📏',
+].join('\n');
+
+const DEFAULT_RULES = { handle:'tulz.lv', requireMention:true, requireTool:true, includeReplies:false, deadline:'', exclude:'', keywords:DEFAULT_KEYWORDS };
+const LS_RULES = 'tulz-giveaway-rules';
+
+const state = {
+  token:null, demo:false, accounts:[], account:null, media:[], mediaNext:null,
+  post:null, comments:[], entries:[], overrides:{}, winners:[], log:[], filter:'all',
+};
+
+/* ============================ helpers ============================ */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const norm = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ️]/g, '');
+const parseTs = ts => new Date(String(ts).replace(/([+-]\d\d)(\d\d)$/, '$1:$2'));
+const fmtDate = d => d.toLocaleString(undefined, {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+const lsGet = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const show = (el, on = true) => (typeof el === 'string' ? $(el) : el).classList.toggle('hidden', !on);
+function toast(msg){
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2600);
+}
+function randInt(n){ // unbiased crypto random integer in [0, n)
+  const max = Math.floor(0x100000000 / n) * n, buf = new Uint32Array(1);
+  do crypto.getRandomValues(buf); while (buf[0] >= max);
+  return buf[0] % n;
+}
+async function fingerprint(list){
+  try {
+    const data = new TextEncoder().encode(list.map(e => e.key).sort().join('\n'));
+    const h = await crypto.subtle.digest('SHA-256', data);
+    return [...new Uint8Array(h)].slice(0, 6).map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch { return 'n/a'; }
+}
+
+/* ============================ Graph API ============================ */
+async function gget(pathOrUrl, params = {}){
+  let url;
+  if (pathOrUrl.startsWith('https://')) url = new URL(pathOrUrl);
+  else {
+    url = new URL(`https://graph.facebook.com/${CONFIG.GRAPH_VERSION}${pathOrUrl}`);
+    for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+    url.searchParams.set('access_token', state.token);
+  }
+  let json;
+  try {
+    const res = await fetch(url);
+    json = await res.json().catch(() => ({}));
+  } catch {
+    // fetch is blocked when the page is opened as a local file (file://) or by some browsers; JSONP still works there
+    try { json = await jsonp(url); }
+    catch {
+      throw new Error('Your browser blocked the connection to graph.facebook.com. This is usually an ad/privacy blocker ' +
+        '(uBlock, AdGuard, Privacy Badger, Brave Shields, Firefox strict tracking protection). Turn it off for this page, ' +
+        'or open the page in another browser, then click Connect again.');
+    }
+  }
+  if (json.error) {
+    const e = json.error;
+    if (e.code === 190) throw new Error('Access token is invalid or expired. Generate a new one and connect again.');
+    if (e.code === 10 || e.code === 200) throw new Error(`Missing permission: ${e.message}. Re-generate the token with all permissions listed in the instructions.`);
+    throw new Error(e.message || 'Meta API error');
+  }
+  return json;
+}
+
+let jsonpSeq = 0;
+function jsonp(url){
+  return new Promise((resolve, reject) => {
+    const name = '__graphCb' + (++jsonpSeq), u = new URL(url), s = document.createElement('script');
+    u.searchParams.set('callback', name);
+    const done = () => { delete window[name]; s.remove(); clearTimeout(timer); };
+    const timer = setTimeout(() => { done(); reject(new Error('timeout')); }, 20000);
+    window[name] = data => { done(); resolve(data); };
+    s.onerror = () => { done(); reject(new Error('blocked')); };
+    s.src = u.toString();
+    document.head.appendChild(s);
+  });
+}
+
+/* ============================ 1. Connect ============================ */
+function setupFb(){
+  const canFb = CONFIG.APP_ID && location.protocol === 'https:';
+  if (!canFb) {
+    $('btnFb').disabled = true;
+    $('fbHint').textContent = CONFIG.APP_ID ? 'Login works only when this page is hosted on https.' : 'Login button needs your App ID set in the page config. Paste a token below instead.';
+    return;
+  }
+  window.fbAsyncInit = () => FB.init({ appId: CONFIG.APP_ID, version: CONFIG.GRAPH_VERSION, xfbml:false, cookie:false });
+  const s = document.createElement('script');
+  s.src = 'https://connect.facebook.net/en_US/sdk.js'; s.async = true; s.crossOrigin = 'anonymous';
+  document.head.appendChild(s);
+  $('btnFb').onclick = () => {
+    if (!window.FB) return toast('Facebook SDK is still loading…');
+    FB.login(r => {
+      if (r.authResponse) connect(r.authResponse.accessToken);
+      else showErr('connErr', 'Facebook login was cancelled.');
+    }, { scope: CONFIG.SCOPES });
+  };
+}
+
+function showErr(id, msg){ const el = $(id); el.textContent = msg; show(el, !!msg); }
+
+async function connect(token){
+  showErr('connErr', '');
+  state.token = token; state.demo = false;
+  $('btnToken').disabled = true; $('btnToken').textContent = 'Connecting…';
+  try {
+    const accounts = [];
+    const igFields = 'instagram_business_account{id,username,profile_picture_url}';
+    try {
+      let page = await gget('/me/accounts', { fields:'name,access_token,' + igFields, limit:100 });
+      while (true) {
+        for (const p of page.data || []) if (p.instagram_business_account) accounts.push({ ...p.instagram_business_account, pageName: p.name, pageToken: p.access_token });
+        if (!page.paging?.next) break;
+        page = await gget(page.paging.next);
+      }
+    } catch (e) {
+      if (/expired|invalid/i.test(e.message)) throw e;
+    }
+    if (!accounts.length) {
+      // Maybe a Page token was pasted: then /me is the Page itself
+      const me = await gget('/me', { fields:'name,' + igFields }).catch(() => null);
+      if (me?.instagram_business_account) accounts.push({ ...me.instagram_business_account, pageName: me.name, pageToken: token });
+    }
+    if (!accounts.length) throw new Error('No Instagram Business/Creator account found. Make sure @tulz.lv is linked to a Facebook Page you manage, and that the token has pages_show_list and instagram_basic.');
+    state.accounts = accounts;
+    afterConnect();
+  } catch (e) {
+    state.token = null;
+    showErr('connErr', e.message);
+  } finally {
+    $('btnToken').disabled = false; $('btnToken').textContent = 'Connect';
+  }
+}
+
+function afterConnect(index = 0, scroll = true){
+  $('tokenInput').value = '';
+  if (!state.demo && !$('remember').checked) { try { localStorage.removeItem(LS_LOGIN); } catch {} }
+  const sel = $('acctSelect');
+  sel.innerHTML = state.accounts.map((a, i) => `<option value="${i}">@${esc(a.username)} (${esc(a.pageName)})</option>`).join('');
+  sel.value = index;
+  show('acctWrap', state.accounts.length > 1);
+  selectAccount(index);
+  show('secPost');
+  if (scroll) $('secPost').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+const LS_LOGIN = 'tulz-giveaway-login';
+
+function selectAccount(i){
+  state.account = state.accounts[i];
+  if (!state.demo && state.account.pageToken) {
+    state.token = state.account.pageToken;
+    if ($('remember').checked) lsSet(LS_LOGIN, { accounts: state.accounts, index: i });
+  }
+  show('btnForget', !state.demo);
+  const p = $('connPill'); p.classList.add('on');
+  p.textContent = (state.demo ? 'Demo · ' : 'Connected · ') + '@' + state.account.username;
+  state.media = []; state.mediaNext = null;
+  loadMedia();
+}
+
+function restoreLogin(){
+  const saved = lsGet(LS_LOGIN);
+  if (!saved?.accounts?.length) return;
+  state.demo = false; state.accounts = saved.accounts;
+  afterConnect(Math.min(saved.index || 0, saved.accounts.length - 1), false);
+}
+
+function forgetLogin(msg = ''){
+  try { localStorage.removeItem(LS_LOGIN); } catch {}
+  state.token = null; state.accounts = []; state.account = null; state.post = null;
+  ['secPost', 'secRules', 'secEntries', 'secDraw', 'btnForget'].forEach(s => show(s, false));
+  const p = $('connPill'); p.classList.remove('on'); p.textContent = 'Not connected';
+  showErr('connErr', msg);
+}
+
+/* ============================ 2. Post ============================ */
+async function loadMedia(more = false){
+  showErr('postErr', '');
+  if (state.demo) { state.media = DEMO.media; renderMedia(); return; }
+  try {
+    const page = more && state.mediaNext
+      ? await gget(state.mediaNext)
+      : await gget(`/${state.account.id}/media`, { fields:'id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,comments_count', limit:24 });
+    state.media = more ? state.media.concat(page.data) : page.data;
+    state.mediaNext = page.paging?.next || null;
+    renderMedia();
+  } catch (e) {
+    if (/invalid or expired/i.test(e.message)) forgetLogin('Your saved login has expired. Paste a new token to reconnect.');
+    else showErr('postErr', e.message);
+  }
+}
+
+function renderMedia(){
+  $('mediaGrid').innerHTML = state.media.map(m => {
+    const src = m.media_type === 'VIDEO' ? m.thumbnail_url : m.media_url;
+    const img = src ? `<img class="thumb" src="${esc(src)}" alt="" loading="lazy">` : `<div class="thumb">${esc(m.emoji || '🖼')}</div>`;
+    return `<button class="media${state.post?.id === m.id ? ' sel' : ''}" data-id="${esc(m.id)}">${img}
+      <div class="meta"><span class="cap">${esc(m.caption || '(no caption)')}</span>
+      <span class="cnt">💬 ${m.comments_count ?? '?'} · ${fmtDate(parseTs(m.timestamp))}</span></div></button>`;
+  }).join('') || '<div class="empty">No posts found.</div>';
+  show('btnMoreMedia', !!state.mediaNext);
+}
+
+async function findPostByUrl(){
+  const m = $('postUrl').value.match(/instagram\.com\/(?:[\w.]+\/)?(?:p|reel|tv)\/([\w-]+)/i);
+  if (!m) return showErr('postErr', 'That doesn’t look like an Instagram post link.');
+  const code = m[1];
+  const match = () => state.media.find(x => x.permalink && x.permalink.includes('/' + code));
+  let found = match(), pages = 0;
+  while (!found && state.mediaNext && pages++ < 10) { await loadMedia(true); found = match(); }
+  if (!found) return showErr('postErr', 'Post not found among this account’s posts. Is it posted by the connected account?');
+  selectPost(found.id);
+}
+
+function selectPost(id){
+  state.post = state.media.find(m => m.id === id);
+  const saved = lsGet('tulz-giveaway-post-' + id) || {};
+  state.overrides = saved.overrides || {};
+  state.winners = saved.winners || [];
+  state.log = saved.log || [];
+  renderMedia();
+  ['secRules', 'secEntries', 'secDraw'].forEach(s => show(s));
+  loadComments();
+  $('secRules').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function persistPost(){
+  if (state.post) lsSet('tulz-giveaway-post-' + state.post.id, { overrides:state.overrides, winners:state.winners, log:state.log });
+}
+
+/* ============================ comments ============================ */
+async function loadComments(){
+  const prog = $('progress');
+  show(prog); prog.textContent = 'Loading comments…';
+  $('list').innerHTML = '';
+  try {
+    if (state.demo) { state.comments = DEMO.comments(state.post.id); }
+    else {
+      const out = [];
+      let page = await gget(`/${state.post.id}/comments`, {
+        fields:'id,text,username,timestamp,like_count,replies.limit(100){id,text,username,timestamp}', limit:50,
+      });
+      while (true) {
+        for (const c of page.data || []) {
+          out.push({ id:c.id, username:c.username, text:c.text || '', timestamp:c.timestamp, isReply:false });
+          for (const r of c.replies?.data || []) out.push({ id:r.id, username:r.username, text:r.text || '', timestamp:r.timestamp, isReply:true });
+        }
+        prog.textContent = `Loading comments… ${out.length}`;
+        if (!page.paging?.next) break;
+        page = await gget(page.paging.next);
+      }
+      state.comments = out;
+    }
+    show(prog, false);
+    $('entriesSub').textContent = `Loaded ${new Date().toLocaleTimeString()} · post: ${(state.post.caption || '').slice(0, 60)}${(state.post.caption || '').length > 60 ? '…' : ''}`;
+    recompute();
+  } catch (e) {
+    prog.textContent = 'Error: ' + e.message;
+  }
+}
+
+/* ============================ 3. Rules ============================ */
+function loadRules(){
+  const r = { ...DEFAULT_RULES, ...(lsGet(LS_RULES) || {}) };
+  $('rHandle').value = r.handle; $('rMention').checked = r.requireMention; $('rTool').checked = r.requireTool;
+  $('rReplies').checked = r.includeReplies; $('rDeadline').value = r.deadline; $('rExclude').value = r.exclude;
+  $('rKeywords').value = r.keywords; $('handleEcho').textContent = r.handle;
+}
+function readRules(){
+  const r = {
+    handle: $('rHandle').value.trim().replace(/^@/, '') || 'tulz.lv',
+    requireMention: $('rMention').checked, requireTool: $('rTool').checked, includeReplies: $('rReplies').checked,
+    deadline: $('rDeadline').value, exclude: $('rExclude').value, keywords: $('rKeywords').value,
+  };
+  $('handleEcho').textContent = r.handle;
+  // Only store a custom keyword list, so improvements to the default list still reach you
+  lsSet(LS_RULES, { ...r, keywords: r.keywords === DEFAULT_KEYWORDS ? undefined : r.keywords });
+  return r;
+}
+
+// Words must match at the start of a word ("ota" ≠ "protams"); emoji match anywhere.
+function keywordMatcher(raw){
+  const n = norm(raw);
+  if (!/^[\p{L}\p{N}]/u.test(n)) return { raw, test: t => t.includes(n) };
+  const re = new RegExp('(^|[^\\p{L}\\p{N}])' + escRe(n), 'u');
+  return { raw, test: t => re.test(t) };
+}
+
+function detectTools(text, keywords){
+  const t = norm(text.replace(/@[\w.]+/g, ' '));
+  const found = [];
+  for (const k of keywords) if (k.test(t) && !found.includes(k.raw)) found.push(k.raw);
+  return found;
+}
+
+function recompute(){
+  const r = readRules();
+  const mentionRe = new RegExp('(^|[^\\w.])@' + escRe(r.handle) + '(?!\\w)(?!\\.\\w)', 'i');
+  const keywords = [...new Map(r.keywords.split('\n').map(s => s.trim()).filter(Boolean).map(raw => [norm(raw), keywordMatcher(raw)])).values()];
+  const excluded = new Set(r.exclude.split(/[\s,]+/).map(s => s.replace(/^@/, '').toLowerCase()).filter(Boolean));
+  const owner = (state.account?.username || '').toLowerCase();
+  const deadline = r.deadline ? new Date(r.deadline) : null;
+
+  const users = new Map();
+  for (const c of state.comments) {
+    if (!c.username) continue;
+    if (c.isReply && !r.includeReplies) continue;
+    const key = c.username.toLowerCase();
+    if (!users.has(key)) users.set(key, { key, username:c.username, comments:[] });
+    users.get(key).comments.push(c);
+  }
+
+  state.entries = [...users.values()].map(u => {
+    u.comments.sort((a, b) => parseTs(a.timestamp) - parseTs(b.timestamp));
+    const inTime = deadline ? u.comments.filter(c => parseTs(c.timestamp) <= deadline) : u.comments;
+    const text = inTime.map(c => c.text).join('\n');
+    const mention = mentionRe.test(text);
+    const tools = detectTools(text, keywords);
+    let status = 'valid', reason = 'Meets all rules';
+    if (u.key === owner) { status = 'invalid'; reason = 'Post owner'; }
+    else if (excluded.has(u.key)) { status = 'invalid'; reason = 'Excluded account'; }
+    else if (!inTime.length) { status = 'invalid'; reason = 'Commented after deadline'; }
+    else if (r.requireMention && !mention) { status = 'invalid'; reason = `No @${r.handle} mention`; }
+    else if (r.requireTool && !tools.length) { status = 'review'; reason = 'No tool keyword found. Read and decide'; }
+    const ov = state.overrides[u.key];
+    const autoStatus = status;
+    if (ov === 'approve' && reason !== 'Post owner') { status = 'valid'; reason = 'Approved manually'; }
+    if (ov === 'reject') { status = 'invalid'; reason = 'Rejected manually'; }
+    return { ...u, first: parseTs(u.comments[0].timestamp), tools, status, autoStatus, reason, override: ov };
+  }).sort((a, b) => a.first - b.first);
+
+  renderEntries();
+  renderDraw();
+}
+
+/* ============================ 4. Entries ============================ */
+function renderEntries(){
+  const E = state.entries, cnt = s => E.filter(e => e.status === s).length;
+  $('sComments').textContent = state.comments.length;
+  $('sPeople').textContent = E.length;
+  $('sValid').textContent = cnt('valid');
+  $('sReview').textContent = cnt('review');
+  document.querySelectorAll('#tabs button').forEach(b => {
+    const f = b.dataset.f, n = f === 'all' ? E.length : cnt(f);
+    b.textContent = { all:'All', valid:'Valid', review:'Needs review', invalid:'Invalid' }[f] + ` (${n})`;
+    b.classList.toggle('act', f === state.filter);
+  });
+  show('bulkRow', cnt('review') > 0);
+
+  const q = $('search').value.trim().toLowerCase();
+  const rows = E.filter(e => (state.filter === 'all' || e.status === state.filter) &&
+    (!q || e.key.includes(q) || e.comments.some(c => c.text.toLowerCase().includes(q))));
+  const label = { valid:'Valid', review:'Needs review', invalid:'Invalid' };
+  const winnerKeys = new Set(state.winners.filter(w => w.status !== 'dq').map(w => w.key));
+
+  $('list').innerHTML = rows.map(e => {
+    const cm = e.comments.map(c => `<div class="cmt">${esc(c.text).replace(/@[\w.]+/g, m => `<span class="mention">${m}</span>`)}<small>${c.isReply ? 'reply · ' : ''}${fmtDate(parseTs(c.timestamp))}</small></div>`).join('');
+    const acts = [];
+    if (e.status !== 'valid') acts.push(`<button class="small" data-act="approve" data-k="${esc(e.key)}">Approve</button>`);
+    if (e.status !== 'invalid') acts.push(`<button class="small" data-act="reject" data-k="${esc(e.key)}">Reject</button>`);
+    if (e.override) acts.push(`<button class="small ghost" data-act="reset" data-k="${esc(e.key)}">Undo</button>`);
+    return `<div class="entry">
+      <div class="who"><a href="https://instagram.com/${encodeURIComponent(e.username)}" target="_blank" rel="noopener">@${esc(e.username)}</a>
+        <span class="badge b-${e.status}">${label[e.status]}</span>${winnerKeys.has(e.key) ? '<span class="badge b-valid">🏆 Winner</span>' : ''}
+        <span class="reason">${esc(e.reason)}</span>${e.tools.slice(0, 3).map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div>
+      <div class="acts">${acts.join('')}</div>
+      <div class="cmts">${cm}</div></div>`;
+  }).join('') || `<div class="empty">${state.comments.length ? 'Nothing matches this filter.' : 'No comments yet.'}</div>`;
+}
+
+function setOverride(key, v){
+  if (v) state.overrides[key] = v; else delete state.overrides[key];
+  persistPost(); recompute();
+}
+
+function exportCsv(){
+  const q = s => `"${String(s).replace(/"/g, '""')}"`;
+  const lines = [['username', 'status', 'reason', 'tools_detected', 'first_comment', 'comments'].join(',')];
+  for (const e of state.entries) lines.push([e.username, e.status, e.reason, e.tools.join(' | '), e.first.toISOString(), e.comments.map(c => c.text).join(' || ')].map(q).join(','));
+  const blob = new Blob(['﻿' + lines.join('\n')], { type:'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `giveaway-entries-${state.post.id}.csv`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+/* ============================ 5. Draw ============================ */
+function eligiblePool(){
+  const drawn = new Set(state.winners.map(w => w.key));
+  return state.entries.filter(e => e.status === 'valid' && !drawn.has(e.key));
+}
+
+function renderDraw(){
+  $('eligibleCount').textContent = eligiblePool().length;
+  const W = state.winners;
+  $('winners').innerHTML = W.map((w, i) => `
+    <div class="winner${w.status === 'dq' ? ' dq' : ''}">
+      <div class="top"><span class="badge ${w.status === 'dq' ? 'b-invalid' : 'b-valid'}">${w.status === 'dq' ? 'Disqualified' : '🏆 Winner'}</span>
+        <a class="wname" href="https://instagram.com/${encodeURIComponent(w.username)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">@${esc(w.username)}</a>
+        <span class="reason">drawn ${fmtDate(new Date(w.at))}</span></div>
+      ${w.status === 'dq' ? '' : `<div class="checks">
+        ${[['follows', 'Follows @' + esc(readRulesQuiet().handle)], ['shared', 'Shared the post'], ['contacted', 'Contacted / DM sent']].map(([k, l]) =>
+          `<label class="check"><input type="checkbox" data-w="${i}" data-c="${k}" ${w.checks[k] ? 'checked' : ''}> ${l}</label>`).join('')}
+      </div>
+      <div class="row"><button class="small" data-redraw="${i}">Doesn’t qualify. Disqualify &amp; draw a replacement</button></div>`}
+    </div>`).join('');
+  $('log').innerHTML = state.log.map(l => `<div>${esc(l)}</div>`).join('');
+  show('btnCopy', W.length > 0); show('btnClearWinners', W.length > 0);
+}
+function readRulesQuiet(){ return { handle: $('rHandle').value.trim().replace(/^@/, '') || 'tulz.lv' }; }
+
+async function draw(count, replacingIndex = null){
+  let pool = eligiblePool();
+  if (!pool.length) return toast('No eligible entries left to draw from.');
+  const poolSize = pool.length, fp = await fingerprint(pool), names = pool.map(e => e.username);
+  const picks = [];
+  for (let i = 0; i < count && pool.length; i++) picks.push(pool.splice(randInt(pool.length), 1)[0]);
+  await animate(picks, names);
+  const at = new Date().toISOString();
+  for (const p of picks) state.winners.push({ key:p.key, username:p.username, status:'ok', at, checks:{ follows:false, shared:false, contacted:false } });
+  state.log.push(`${new Date(at).toLocaleString()} · ${replacingIndex !== null ? 'Replacement draw' : 'Draw'} from ${poolSize} eligible entries (pool #${fp}) → ${picks.map(p => '@' + p.username).join(', ')}`);
+  persistPost(); renderDraw(); renderEntries();
+}
+
+function animate(picks, names){
+  const ov = $('overlay'), nm = $('ovName'), lbl = $('ovLabel'), btn = $('ovClose');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  show(ov); show(btn, false);
+  return new Promise(async resolve => {
+    for (let k = 0; k < picks.length; k++) {
+      lbl.textContent = picks.length > 1 ? `Drawing winner ${k + 1} of ${picks.length}…` : 'Drawing…';
+      nm.classList.remove('final');
+      if (!reduce) {
+        let delay = 40;
+        while (delay < 320) {
+          nm.textContent = '@' + names[Math.floor(Math.random() * names.length)];
+          await new Promise(r => setTimeout(r, delay));
+          delay *= 1.12;
+        }
+      }
+      nm.textContent = '@' + picks[k].username; nm.classList.add('final');
+      lbl.textContent = picks.length > 1 ? `Winner ${k + 1} of ${picks.length}` : '🏆 Winner';
+      if (k < picks.length - 1) await new Promise(r => setTimeout(r, 1400));
+    }
+    show(btn); btn.focus();
+    btn.onclick = () => { show(ov, false); resolve(); };
+  });
+}
+
+function copyResults(){
+  const t = state.winners.map(w => `${w.status === 'dq' ? '✗' : '🏆'} @${w.username}${w.status === 'dq' ? ' (disqualified)' : ''}`).join('\n') + '\n\n' + state.log.join('\n');
+  navigator.clipboard.writeText(t).then(() => toast('Results copied'), () => toast('Copy failed'));
+}
+
+/* ============================ demo data ============================ */
+const DEMO = {
+  account: { id:'demo', username:'tulz.lv', pageName:'Tulz' },
+  media: [
+    { id:'m1', emoji:'🪚', caption:'🎁 GIVEAWAY! Win this DIY birdhouse kit. Comment, tag @tulz.lv and tell us which tool you’d use first!', media_type:'IMAGE', comments_count:46, timestamp:'2026-10-01T09:00:00+0000', permalink:'https://www.instagram.com/p/DEMO1/' },
+    { id:'m2', emoji:'🔨', caption:'Workshop weekend: shelf build from scratch', media_type:'IMAGE', comments_count:12, timestamp:'2026-09-24T15:00:00+0000', permalink:'https://www.instagram.com/p/DEMO2/' },
+    { id:'m3', emoji:'🧰', caption:'New in store: compact tool kits', media_type:'VIDEO', comments_count:8, timestamp:'2026-09-17T10:00:00+0000', permalink:'https://www.instagram.com/p/DEMO3/' },
+  ],
+  comments(){
+    const rows = [
+      ['janis.krumins','@tulz.lv urbjmašīna! 🔨'],['liga_diy','@tulz.lv I’d start with the cordless drill'],['martins.k','Skrūvgriezis, protams @tulz.lv'],
+      ['anna_creates','@tulz.lv 🪚🪚 jigsaw for sure'],['edgars_wood','@tulz.lv leņķa slipmasina būtu top'],['kristine.home','@tulz.lv yes please!! 😍'],
+      ['ralfs99','Amazing project 🔥'],['dace.b','@tulz.lv hammer time 🔨'],['toms_builds','@tulz.lv the orange one in the photo'],
+      ['ilze_garden','@tulz.lv zāģis un āmurs!'],['karlis.p','@janis.krumins skaties šo'],['madara.art','@tulz.lv glue gun obviously'],
+      ['tulz.lv','Good luck everyone! 🍀'],['oskars_m','@tulz.lv uzgriežņu atslēga'],['sandra.diy','@tulz.lv 🤞🤞'],
+      ['reinis_f','@tulz.lv Ēvele! Vecā skola'],['evija.l','@tulz.lv I would use a sander'],['aigars.t','@tulzlv drill'],
+      ['nora_makes','@tulz.lv wrench 🔧'],['peteris.w','@tulz.lv measuring tape and pencil first'],['laura_k','Cool! @tulz.lv'],
+      ['vents.b','@tulz.lv 🪛'],['zane_crafts','@tulz.lv multitool!'],['arturs.d','@tulz.lv frēze'],
+      ['inga.r','@tulz.lv knaibles'],['davis_m','Kur var nopirkt?'],['elina.s','@tulz.lv a good old chisel'],
+      ['roberts_j','@tulz.lv flex 💪'],['sintija.v','@tulz.lv clamps, you can never have enough'],['gatis.o','@tulz.lv 🛠️'],
+      ['liene_p','@tulz.lv mērlente!'],['mareks.z','@tulz.lv urbis'],['agnese.h','@tulz.lv 💛'],['kaspars_n','@tulz.lv impact driver'],
+    ];
+    const base = Date.parse('2026-10-01T09:30:00Z');
+    const out = rows.map(([u, t], i) => ({ id:'c' + i, username:u, text:t, timestamp:new Date(base + i * 37 * 60000).toISOString(), isReply:false }));
+    out.push({ id:'cx1', username:'janis.krumins', text:'@tulz.lv also a saw 😄', timestamp:new Date(base + 50 * 3600000).toISOString(), isReply:false });
+    out.push({ id:'cx2', username:'liga_diy', text:'@tulz.lv fingers crossed', timestamp:new Date(base + 3 * 3600000).toISOString(), isReply:true });
+    out.push({ id:'cx3', username:'late_luke', text:'@tulz.lv screwdriver!', timestamp:new Date(base + 9 * 86400000).toISOString(), isReply:false });
+    return out;
+  },
+};
+
+function startDemo(){
+  showErr('connErr', '');
+  state.demo = true; state.token = null; state.accounts = [DEMO.account];
+  afterConnect();
+}
+
+/* ============================ wiring ============================ */
+setupFb();
+loadRules();
+restoreLogin();
+$('btnForget').onclick = () => forgetLogin();
+$('btnToken').onclick = () => { const t = $('tokenInput').value.trim(); if (t) connect(t); else showErr('connErr', 'Paste an access token first.'); };
+$('tokenInput').onkeydown = e => { if (e.key === 'Enter') $('btnToken').click(); };
+$('btnDemo').onclick = startDemo;
+$('acctSelect').onchange = e => selectAccount(+e.target.value);
+$('btnMoreMedia').onclick = () => loadMedia(true);
+$('btnFindPost').onclick = findPostByUrl;
+$('mediaGrid').onclick = e => { const b = e.target.closest('.media'); if (b) selectPost(b.dataset.id); };
+['rHandle', 'rMention', 'rTool', 'rReplies', 'rDeadline', 'rExclude', 'rKeywords'].forEach(id => $(id).addEventListener('input', () => { if (state.post) recompute(); else readRules(); }));
+$('btnResetKw').onclick = () => { $('rKeywords').value = DEFAULT_KEYWORDS; state.post ? recompute() : readRules(); };
+$('tabs').onclick = e => { const b = e.target.closest('button'); if (b) { state.filter = b.dataset.f; renderEntries(); } };
+$('search').oninput = renderEntries;
+$('list').onclick = e => { const b = e.target.closest('button[data-act]'); if (b) setOverride(b.dataset.k, b.dataset.act === 'reset' ? null : b.dataset.act); };
+$('btnApproveAll').onclick = () => { state.entries.filter(e => e.status === 'review').forEach(e => state.overrides[e.key] = 'approve'); persistPost(); recompute(); };
+$('btnReload').onclick = loadComments;
+$('btnCsv').onclick = exportCsv;
+$('btnDraw').onclick = () => draw(Math.max(1, Math.min(50, parseInt($('nWinners').value) || 1)));
+$('btnCopy').onclick = copyResults;
+$('btnClearWinners').onclick = () => { if (confirm('Clear all drawn winners and the draw log for this post?')) { state.winners = []; state.log = []; persistPost(); renderDraw(); renderEntries(); } };
+$('winners').onclick = e => {
+  const b = e.target.closest('button[data-redraw]');
+  if (!b) return;
+  const w = state.winners[+b.dataset.redraw];
+  w.status = 'dq';
+  state.log.push(`${new Date().toLocaleString()} · @${w.username} disqualified`);
+  draw(1, +b.dataset.redraw);
+};
+$('winners').onchange = e => {
+  const c = e.target.closest('input[data-w]');
+  if (c) { state.winners[+c.dataset.w].checks[c.dataset.c] = c.checked; persistPost(); }
+};
+</script>
+</body>
+</html>
