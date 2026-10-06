@@ -187,17 +187,24 @@ code{font-size:12.5px;background:var(--surface);border:1px solid var(--border);b
       <div>
         <label class="f">② Story share tagging @<span class="handleEcho">tulz.lv</span></label>
         <label class="check"><input type="checkbox" id="rStory"> <span>Required to win</span></label>
-        <label class="f" style="margin-top:10px" for="rStories">Who tagged you in a story <span style="font-weight:400;color:var(--muted)">(<span id="storyCount">0</span> added)</span></label>
-        <textarea id="rStories" rows="7" placeholder="janis.krumins&#10;liga_diy&#10;@martins.k"></textarea>
-        <div class="hint">One username per line, or separated by commas or spaces. The @ is optional. Paste as the notifications come in — this list is saved for this post.</div>
+        <label class="f" style="margin-top:10px" for="rStoryPaste">Paste anything from Instagram</label>
+        <textarea id="rStoryPaste" rows="4" placeholder="Select the notifications or DM list on instagram.com, copy, and paste the whole lot here — messy text is fine."></textarea>
+        <div class="row" style="margin-top:6px">
+          <button class="small primary" id="btnExtract">Find usernames</button>
+          <span class="hint" id="extractMsg"></span>
+        </div>
+        <label class="f" style="margin-top:14px" for="rStories">Confirmed story tags <span style="font-weight:400;color:var(--muted)">(<span id="storyCount">0</span>)</span></label>
+        <textarea id="rStories" rows="5" placeholder="janis.krumins&#10;liga_diy&#10;@martins.k"></textarea>
+        <div class="hint">One per line, or separated by commas or spaces. The @ is optional. Saved for this post, so you can add to it day by day.</div>
         <details style="margin-top:10px">
-          <summary>Where to find these names</summary>
+          <summary>How to collect these in a minute</summary>
           <ol>
-            <li>In the Instagram app as <b>@<span class="handleEcho">tulz.lv</span></b>, a story tag arrives as a notification <i>and</i> as a message in your inbox (<b>DMs → “mentioned you in their story”</b>).</li>
-            <li>The inbox is the reliable place: notifications scroll away, messages stay for 24 h after the story ends.</li>
-            <li>Copy each username into the box above. Do this once a day during the giveaway, so nothing is missed.</li>
+            <li>Open <a href="https://www.instagram.com/direct/inbox/" target="_blank" rel="noopener">instagram.com/direct/inbox</a> on a computer, signed in as <b>@<span class="handleEcho">tulz.lv</span></b>. Story tags arrive there as messages (“mentioned you in your story”), and unlike notifications they don’t scroll away.</li>
+            <li>Select the conversation list, copy it, and paste it into the box above. Click <b>Find usernames</b>.</li>
+            <li>It keeps only names that actually commented on this post, and ignores all the surrounding text — so pasting too much is harmless.</li>
+            <li>Do this once a day during the giveaway. Story tags are only visible for 24 h after the story ends.</li>
           </ol>
-          <p class="hint">Meta’s API does not expose story tags, so no tool (this one included) can collect them for you.</p>
+          <p class="hint">Meta’s API does not expose story tags to any third-party tool, so this one step stays manual.</p>
         </details>
         <label class="f" style="margin-top:14px" for="rKeywords">Tool / thing keywords (one per line, Latvian without ā/š/ž is fine)</label>
         <textarea id="rKeywords" rows="6"></textarea>
@@ -595,6 +602,35 @@ function readRules(){
 
 const parseUsers = s => [...new Set(String(s).split(/[\s,;]+/).map(x => x.replace(/^@/, '').toLowerCase()).filter(Boolean))];
 
+// Pull usernames out of whatever was pasted. Anything written as @handle counts; bare words
+// count only when they match someone who commented, so surrounding prose is ignored.
+function extractStoryUsers(){
+  const raw = $('rStoryPaste').value;
+  if (!raw.trim()) return setExtractMsg('Paste something first.');
+  const owner = (state.account?.username || '').toLowerCase();
+  const commenters = new Map(state.entries.map(e => [e.key, e.username]));
+  const found = new Map();
+  const add = (k, name) => { if (k && k !== owner) found.set(k, name); };
+  for (const m of raw.matchAll(/@([A-Za-z0-9._]{2,30})/g)) {
+    const k = m[1].toLowerCase().replace(/\.+$/, '');
+    add(k, commenters.get(k) || m[1]);
+  }
+  for (const tok of raw.split(/[^A-Za-z0-9._]+/)) {
+    const k = tok.toLowerCase().replace(/\.+$/, '');
+    if (commenters.has(k)) add(k, commenters.get(k));
+  }
+  const already = new Set(parseUsers($('rStories').value));
+  const fresh = [...found.keys()].filter(k => !already.has(k));
+  if (!fresh.length) return setExtractMsg(found.size ? `No new names — all ${found.size} were already in the list.` : 'No usernames found in that text.');
+  const box = $('rStories');
+  box.value = (box.value.trim() ? box.value.replace(/\s*$/, '\n') : '') + fresh.join('\n') + '\n';
+  $('rStoryPaste').value = '';
+  const matched = fresh.filter(k => commenters.has(k)).length;
+  setExtractMsg(`Added ${fresh.length} — ${matched} of them commented on this post.`);
+  persistPost(); recompute();
+}
+function setExtractMsg(t){ $('extractMsg').textContent = t; }
+
 // Words must match at the start of a word ("ota" ≠ "protams"); emoji match anywhere.
 function keywordMatcher(raw){
   const n = norm(raw);
@@ -836,6 +872,8 @@ $('btnFindPost').onclick = findPostByUrl;
 $('mediaGrid').onclick = e => { const b = e.target.closest('.media'); if (b) selectPost(b.dataset.id); };
 ['rHandle', 'rMention', 'rTool', 'rStory', 'rReplies', 'rDeadline', 'rExclude', 'rKeywords', 'rStories'].forEach(id =>
   $(id).addEventListener('input', () => { if (state.post) { persistPost(); recompute(); } else readRules(); }));
+$('btnExtract').onclick = extractStoryUsers;
+$('rStoryPaste').onkeydown = e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) extractStoryUsers(); };
 $('btnResetKw').onclick = () => { $('rKeywords').value = DEFAULT_KEYWORDS; state.post ? recompute() : readRules(); };
 $('tabs').onclick = e => { const b = e.target.closest('button'); if (b) { state.filter = b.dataset.f; renderEntries(); } };
 $('search').oninput = renderEntries;
