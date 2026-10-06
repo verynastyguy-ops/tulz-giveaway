@@ -649,7 +649,10 @@ function recompute(){
   const excluded = new Set(parseUsers(r.exclude));
   const owner = (state.account?.username || '').toLowerCase();
   const deadline = r.deadline ? new Date(r.deadline) : null;
-  const storyUsers = parseUsers(r.stories);
+  // The story list only counts when you are actually maintaining it; otherwise the
+  // winner's share is verified by hand at the draw, so nothing here may pre-confirm it.
+  state.useStories = r.requireStory;
+  const storyUsers = r.requireStory ? parseUsers(r.stories) : [];
   const storySet = new Set(storyUsers);
   $('storyCount').textContent = storyUsers.length;
   show('storyBox', r.requireStory);
@@ -697,7 +700,7 @@ function recompute(){
 function renderEntries(){
   const E = state.entries, cnt = s => E.filter(e => e.status === s).length;
   $('sPeople').textContent = E.length;
-  $('sStory').textContent = parseUsers($('rStories').value).length;
+  $('sStory').textContent = state.useStories ? parseUsers($('rStories').value).length : '—';
   $('sValid').textContent = cnt('valid');
   $('sReview').textContent = cnt('review');
   document.querySelectorAll('#tabs button').forEach(b => {
@@ -719,7 +722,8 @@ function renderEntries(){
     if (e.status !== 'valid') acts.push(`<button class="small" data-act="approve" data-k="${esc(e.key)}">Approve</button>`);
     if (e.status !== 'invalid') acts.push(`<button class="small" data-act="reject" data-k="${esc(e.key)}">Reject</button>`);
     if (e.override) acts.push(`<button class="small ghost" data-act="reset" data-k="${esc(e.key)}">Undo</button>`);
-    const story = `<span class="badge ${e.story ? 'b-valid' : 'b-invalid'}" title="Story share tagging you">${e.story ? '📲 story' : '📲 no story'}</span>`;
+    const story = state.useStories
+      ? `<span class="badge ${e.story ? 'b-valid' : 'b-invalid'}" title="Story share tagging you">${e.story ? '📲 story' : '📲 no story'}</span>` : '';
     return `<div class="entry">
       <div class="who"><a href="https://instagram.com/${encodeURIComponent(e.username)}" target="_blank" rel="noopener">@${esc(e.username)}</a>
         <span class="badge b-${e.status}">${label[e.status]}</span>${story}${winnerKeys.has(e.key) ? '<span class="badge b-valid">🏆 Winner</span>' : ''}
